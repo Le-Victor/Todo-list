@@ -1,72 +1,76 @@
 const express = require('express')
 const fs = require('fs')
 const app = express()
-const port = 3000
+const port = 4000
 const {
     asyncReadFile,
     asyncWriteFile
-} = require("./dao.js");
+} = require("./dao.js")
 app.use(express.json())
 
-
-app.get('/accounts', (req, res) => fs.readFile('./data.json', 'utf-8', (err, data) => {
-    if (err) {
-        res.status(500).send()
-    } else {
-        res.send(JSON.parse(data))
+const GetAllTasks = (req, res) => fs.readFile('./data.json', "utf-8", (err, data) => {
+    if(err) {
+        return res.status(500).send()
     }
-}))
+    res.send(JSON.parse(data))
+})
 
-// const asyncReadFile = function(path) {
-//     return new Promise(
-//         function(resolve, reject) {
-//             fs.readFile(path, 'utf-8', function(err, data) {
-//                 if(err) {
-//                     reject(err)
-//                 }
-//                 resolve(data)
-//             })
-//         }).catch(err => {
-//         return err
-//     })
-// }
-
-// const asyncWriteFile = function(string, path) {
-//     return new Promise(function (resolve, reject){
-//         fs.writeFile(path, string, function(err){
-//             reject(err)
-//         })
-//     }).catch(err => {
-//         return err
-//     })
-// }
-
-const createAccount = async (req, res) => {
-    const newAccount = req.body
+const GetTask = async(req, res) => {
+    const number = req.params.id
     const file = await asyncReadFile('./data.json')
-    const accounts = JSON.parse(file)
-    if (accounts.filter(v => v.email === newAccount.email).length != 0) {
+    // const tasks = JSON.parse(file)
+    const tasks = JSON.parse(file).filter(v => v.id == number)
+    tasks.length == 0 ? res.status(404).send() : res.send(tasks[0])
+}
+
+const CreateTask = async (req, res) => {
+    const newTasks = req.body
+    const file = await asyncReadFile('./data.json')
+    const tasks = JSON.parse(file)
+    if (tasks.filter(v => v.id === newTasks.id).length != 0) {
         res.status(400).send()
     } else {
-        accounts.push(newAccount)
-        await asyncWriteFile(JSON.stringify(accounts), './data.json')
-        res.status(201).send(accounts)
+        tasks.push(newTasks)
+        await asyncWriteFile(JSON.stringify(tasks), './data.json')
+        res.status(201).send(tasks)
     }
 }
 
-// exports.createTask = async(req, res) => {
-//     const newTask = req.body;
-//     const file = await asyncReadFile(req.app.locals.dataFilePath);
-//     const taskList = JSON.parse(file);
-//     if(taskList.filter(v => v.id === newTask.id).length != 0){
-//         res.status(400).send();
-//     }else{
-//         taskList.push(newTask);
-//         await asyncWriteFile(JSON.stringify(taskList), req.app.locals.dataFilePath);
-//         res.status(201).send(taskList);
-//     }
-// }
-app.post('/accounts', createAccount)
+const UpdateTask = async (req, res) => {
+    const put = req.body
+    const file = await asyncReadFile('./data.json')
+    const tasks = JSON.parse(file)
+    const change = tasks.filter(v => v.id == put.id)
+    // res.send(change)
+    if(change.length == 0){
+        this.createAccount(req.res)
+    }else {
+        tasks.forEach((value, index, array) => {
+            if (value.id === put.id) {
+                array[index] = {
+                    ...value,
+                    ...put
+                }
+            }
+        })
+        await asyncWriteFile(JSON.stringify(tasks), './data.json')
+        res.status(202).send(tasks)
+    }
+}
+
+const deleteTask = async (req, res) => {
+    
+}
+
+app.get("/api/tasks", GetAllTasks)
+
+app.get("/api/tasks/:id", GetTask)
+
+app.post('/api/tasks', CreateTask)
+
+app.put("/api/tasks", UpdateTask)
+
+app.delete("/api/tasks/:id",deleteTask);
 
 app.listen(port, () => console.log(`Our server has been setup and listen on the port: ${port}!`))
 exports.app = app

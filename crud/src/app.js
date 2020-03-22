@@ -69,19 +69,6 @@ const deleteTask = async (req, res) => {
         res.status(203).send(newTasks)
     }
 }
-// exports.deleteAccount = async (req, res) => {
-//     const email = req.params.id
-//     const file = await asyncReadFile(req.app.locals.dataFilePath)
-//     const accounts = JSON.parse(file)
-//     const newAccounts = accounts.filter(v => v.email !== email)
-//     if (newAccounts.length === accounts.length) {
-//       res.status(404).send()
-//     } else {
-//       await asyncWriteFile(JSON.stringify(newAccounts), req.app.locals.dataFilePath)
-//       res.status(204).send()
-//     }
-  
-//   }
 
 app.get("/api/tasks", GetAllTasks)
 

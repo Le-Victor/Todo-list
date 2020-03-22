@@ -18,7 +18,6 @@ const GetAllTasks = (req, res) => fs.readFile('./data.json', "utf-8", (err, data
 const GetTask = async(req, res) => {
     const number = req.params.id
     const file = await asyncReadFile('./data.json')
-    // const tasks = JSON.parse(file)
     const tasks = JSON.parse(file).filter(v => v.id == number)
     tasks.length == 0 ? res.status(404).send() : res.send(tasks[0])
 }
@@ -59,8 +58,30 @@ const UpdateTask = async (req, res) => {
 }
 
 const deleteTask = async (req, res) => {
-    
+    const number = req.params.id
+    const file = await asyncReadFile('./data.json')
+    const tasks = JSON.parse(file)
+    const newTasks = tasks.filter(v => v.id != number)
+    if (newTasks.length === tasks.length) {
+        res.status(404).send()
+    } else{
+        await asyncWriteFile(JSON.stringify(newTasks), './data.json')
+        res.status(203).send(newTasks)
+    }
 }
+// exports.deleteAccount = async (req, res) => {
+//     const email = req.params.id
+//     const file = await asyncReadFile(req.app.locals.dataFilePath)
+//     const accounts = JSON.parse(file)
+//     const newAccounts = accounts.filter(v => v.email !== email)
+//     if (newAccounts.length === accounts.length) {
+//       res.status(404).send()
+//     } else {
+//       await asyncWriteFile(JSON.stringify(newAccounts), req.app.locals.dataFilePath)
+//       res.status(204).send()
+//     }
+  
+//   }
 
 app.get("/api/tasks", GetAllTasks)
 

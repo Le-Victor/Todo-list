@@ -116,17 +116,8 @@ describe("app", () => {
 
     describe("delete request", () =>{
         it("should delete the task with the same id", (done) => {
-            request(app).delete('api/tasks').send({
-                "id": 2,
-                "content": "Git web homework",
-                "createdTime": "2020-03-21T00:03:29Z"
-            }).expect(202).expect(
+            request(app).delete('api/tasks/1').expect(203).expect(
                 [
-                    {
-                        "id": 1, 
-                        "content": "Restful API homework",  
-                        "createdTime": "2019-05-15T00:00:00Z"
-                    },
                     {
                         "id": 2,
                         "content": "Git web homework",
@@ -141,6 +132,12 @@ describe("app", () => {
             ).end((err,res) => {
                 if(err) throw err
                 done()
+            })
+        })
+        it("should not delete the task when its id is already existed", (done) => {
+            request(app).post('/api/tasks/100').expect(404).end((err, res) => {
+              if (err) throw err
+              done()
             })
         })
     })
